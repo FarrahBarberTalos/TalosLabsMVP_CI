@@ -19,10 +19,15 @@ else:
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
 
-    # Let the user upload a file via `st.file_uploader`.
-    uploaded_file = st.file_uploader(
-        "Upload a document (.txt or .md)", type=("txt", "md")
+    import streamlit as st
+
+    uploaded_files = st.file_uploader(
+        "Choose a relevant files", accept_multiple_files=True
     )
+    for uploaded_file in uploaded_files:
+        bytes_data = uploaded_file.read()
+        st.write("filename:", uploaded_file.name)
+        st.write(bytes_data)
 
     # Ask the user for a question via `st.text_area`.
     question = st.text_area(
