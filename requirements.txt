@@ -1,2 +1,16 @@
 streamlit
 openai
+
+Can you produce a draft non material change memo that includes a few sections. 
+The first section should be with relation to the property overview and investment summary in the LP memo. 
+The next section should include the changes mentioned in the Email template, and should be included in the non material 
+change memo as a section unto itself. Then there should be a section that covers any changes noticed between the November and 
+August 2024 Personal Financial Statements, i.e., change to net worth of the person submitting the forms. 
+You can use the uploaded example non-material change memo as the basis for the draft that I require
+
+
+^^ functioning instructions for the prompt
+
+
+
+
