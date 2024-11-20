@@ -1,2 +1,5 @@
 streamlit
 openai
+docx
+pandas
+re
