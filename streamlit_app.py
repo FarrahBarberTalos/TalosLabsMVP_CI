@@ -6,9 +6,20 @@ from openai.error import RateLimitError, InvalidRequestError
 from docx import Document  # For reading and writing .docx files
 from io import BytesIO  # For creating a downloadable Word file
 import re
+import os
+import streamlit as st
+from streamlit.runtime.scriptrunner import ScriptRunContext
+
+os.system("pip list")
 
 # Access the OpenAI API key securely from Streamlit secrets
 openai.api_key = st.secrets["openai"]["api_key"]
+
+try:
+    from openai.error import RateLimitError, InvalidRequestError
+    st.write("Successfully imported RateLimitError and InvalidRequestError")
+except ModuleNotFoundError as e:
+    st.error(f"Import failed: {e}")
 
 # Load the template document
 def load_template():
