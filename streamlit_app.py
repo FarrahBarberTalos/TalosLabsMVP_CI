@@ -130,8 +130,8 @@ if generate_non_material:
             }
         ]
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
+        response = openai.Chat.create(
+            model="gpt-4",
             messages=messages,
         )
         response_content = clean_text(response['choices'][0]['message']['content'])
@@ -155,12 +155,10 @@ if generate_non_material:
             file_name="Non_Material_Change_Memo.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
-    except openai.error.RateLimitError as e:
-        st.error("You have exceeded your OpenAI API quota. Please check your OpenAI plan and billing details.")
-    except openai.error.InvalidRequestError as e:
-        st.error("The specified model does not exist or you do not have access to it. Please check your OpenAI access.")
     except openai.error.OpenAIError as e:
         st.error(f"An OpenAI-related error occurred: {str(e)}")
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {str(e)}")
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
