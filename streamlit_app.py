@@ -62,7 +62,7 @@ st.markdown(
 )
 
 # Show title and description
-st.title("Dominik: Your CRE Co-Pilot")
+st.title("Talos Labs: Your CRE Co-Pilot")
 st.write("I'm designed to make CRE process management seamless. Let me know how I can help.")
 
 # File uploader - customized with specific instructions
@@ -130,7 +130,7 @@ if generate_non_material:
             }
         ]
 
-        response = openai.Chat.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=messages,
         )
@@ -155,10 +155,8 @@ if generate_non_material:
             file_name="Non_Material_Change_Memo.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
-    except openai.error.OpenAIError as e:
+    except openai.OpenAIError as e:
         st.error(f"An OpenAI-related error occurred: {str(e)}")
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {str(e)}")
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
