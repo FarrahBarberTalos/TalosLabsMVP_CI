@@ -158,32 +158,5 @@ if generate_non_material:
         output_doc.add_heading("Non-Material Change Memo", level=1)
         output_doc.add_paragraph(response_content)
 
-        # Save and download the document
-        buffer = BytesIO()
-        output_doc.save(buffer)
-        buffer.seek(0)
-        st.download_button(
-            label="Download Non-Material Change Memo",
-            data=buffer,
-            file_name="Non_Material_Change_Memo.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        )
-    except RateLimitError:
-        st.error("You have exceeded your OpenAI API quota. Please check your OpenAI plan and billing details.")
-    except InvalidRequestError:
-        st.error("The specified model does not exist or you do not have access to it. Please check your OpenAI access.")
-    except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
-
-elif generate_material:
-    st.info("Material Change Memo generation started...")
-    try:
-        # Placeholder logic for Material Change Memo generation
-        st.success("Material Change Memo functionality is not implemented yet.")
-    except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
-
-elif not user_changes.strip() and uploaded_files:
-    st.warning("Please include the changes required in the prompt box above.")
-elif not uploaded_files:
-    st.warning("Please upload relevant files before generating the document.")
+        # Stream the response to the app using `st.write_stream`.
+        st.write_stream(stream)
