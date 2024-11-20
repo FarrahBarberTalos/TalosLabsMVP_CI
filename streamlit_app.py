@@ -2,7 +2,6 @@ from http.client import responses
 import streamlit as st
 import openai
 import pandas as pd
-from openai.error import RateLimitError, InvalidRequestError
 from docx import Document  # For reading and writing .docx files
 from io import BytesIO  # For creating a downloadable Word file
 import re
@@ -156,9 +155,9 @@ if generate_non_material:
             file_name="Non_Material_Change_Memo.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
-    except RateLimitError:
+    except openai.RateLimitError:
         st.error("You have exceeded your OpenAI API quota. Please check your OpenAI plan and billing details.")
-    except InvalidRequestError:
+    except openai.BadRequestError:
         st.error("The specified model does not exist or you do not have access to it. Please check your OpenAI access.")
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
