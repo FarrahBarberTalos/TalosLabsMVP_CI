@@ -155,9 +155,9 @@ if generate_non_material:
             file_name="Non_Material_Change_Memo.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
-    except openai.RateLimitError:
+    except openai.error.RateLimitError:
         st.error("You have exceeded your OpenAI API quota. Please check your OpenAI plan and billing details.")
-    except openai.BadRequestError:
+    except openai.error.InvalidRequestError:
         st.error("The specified model does not exist or you do not have access to it. Please check your OpenAI access.")
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
