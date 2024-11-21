@@ -1,13 +1,13 @@
 from http.client import responses
 import streamlit as st
-import openai
+from openai import OpenAI
 import pandas as pd
 from docx import Document  # For reading and writing .docx files
 from io import BytesIO  # For creating a downloadable Word file
 import re
 
 # Access the OpenAI API key securely from Streamlit secrets
-openai.api_key = st.secrets["openai"]["api_key"]
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 # Load the template document
 def load_template():
@@ -27,7 +27,7 @@ def reformat_financial_section(section_text):
         line = line.strip()
         if not line:
             continue
-        
+
         # Only add bullet points for net worth lines
         if "Net Worth" in line:
             reformatted += f"• {line}\n"
@@ -38,14 +38,14 @@ def reformat_financial_section(section_text):
 def clean_text(text):
     # Basic cleanup only
     text = text.replace('*', '').replace('_', '')
-    
+
     # Handle the financial section
     if "Updated Financial Information:" in text:
         parts = text.split("Updated Financial Information:")
         before = parts[0].strip()
         financial = parts[1].strip() if len(parts) > 1 else ""
         return f"{before}\n\nUpdated Financial Information:\n\n{reformat_financial_section(financial)}"
-    
+
     return text.strip()
 
 # CSS for smaller font size for filenames
@@ -122,19 +122,17 @@ if generate_non_material:
                 "content": (
                     f"Here's a document: {document_content} \n\n---\n\n"
                     f"{user_changes.strip()}\n\n"
-                    "Please include a formatted 'Background Information' section - with the title in bold - that provides a comprehensive overview from the LP memo, "
+                    "I need you to be very clear on the formatting, especially in the financial information section. Please ensure that all of the information provided looks the same. Please include a formatted 'Background Information' section - with the title in bold - that provides a comprehensive overview from the LP memo, "
                     "the property, and the deal. Ensure that the 'Property Overview' section is presented in bullet points, similar to the 'Investment Summary' section. "
-                    "For the 'Updated Financial Information' section, use proper formatting in line with the formatting used above (ie bold header), spacing, and bullet points. I want it to include: 'Previous net worth: {number from the oldest personal financial statement} on one line, then another line with 'Current net worth: {number from the newest personal financial statement}, then on another line: 'Change in assets between the personal financial statements: {include the difference in assets}"
+                    "This is extremely important. For the 'Updated Financial Information' section, use proper formatting in line with the formatting used above (ie bold header), spacing, and bullet points. I want it to include: 'Previous net worth: {number from the oldest personal financial statement} on one line, then another line with 'Current net worth: {number from the newest personal financial statement}, then on another line: 'Change in assets between the personal financial statements: {include the difference in assets}"
                     "Please do not include any pleasantries in your response. Only return the required output. Also, please ensure that the numbers included, especially for the financial section, are consistent with normal text. This should include consistent formatting with previous and updated net worth figures."
                 ),
             }
         ]
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=messages,
-        )
-        response_content = clean_text(response['choices'][0]['message']['content'])
+        response = client.chat.completions.create(model="gpt-4",
+        messages=messages)
+        response_content = clean_text(response.choices[0].message.content)
 
         # Display the generated output in the UI
         st.subheader("Generated Non-Material Change Memo")
