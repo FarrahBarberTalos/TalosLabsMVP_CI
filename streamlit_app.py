@@ -9,75 +9,80 @@ import re
 # Access the OpenAI API key securely from Streamlit secrets
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
-# Load the template document
-def load_template():
-    return Document("20241118 Example Non-Material Change Memo.docx")
-
-# Modify the template based on user input
-def fill_template_with_content(template_doc, additional_content):
-    for para in template_doc.paragraphs:
-        if "{{additional_content}}" in para.text:  # Placeholder for added content
-            para.text = para.text.replace("{{additional_content}}", additional_content)
-    return template_doc
-
-def reformat_financial_section(section_text):
-    reformatted = ""
-    lines = section_text.split("\n")
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-
-        # Only add bullet points for net worth lines
-        if "Net Worth" in line:
-            reformatted += f"• {line}\n"
-        else:
-            reformatted += f"  {line}\n"
-    return reformatted
-
-def clean_text(text):
-    # Basic cleanup only
-    text = text.replace('*', '').replace('_', '')
-
-    # Handle the financial section
-    if "Updated Financial Information:" in text:
-        parts = text.split("Updated Financial Information:")
-        before = parts[0].strip()
-        financial = parts[1].strip() if len(parts) > 1 else ""
-        return f"{before}\n\nUpdated Financial Information:\n\n{reformat_financial_section(financial)}"
-
-    return text.strip()
-
-# CSS for smaller font size for filenames
+# Add custom CSS for UI
 st.markdown(
     """
     <style>
-    .small-font {
-        font-size: 12px;
-        color: #555;
-    }
+        body {
+            background-color: #D7DEE7;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #4E81BD;
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .normal-text {
+            color: black;
+            font-size: 16px;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .small-font {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .file-upload {
+            margin-bottom: 20px;
+        }
+        .button-section {
+            margin-top: 30px;
+        }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# Show title and description
-st.title("Talos Labs: Your CRE Co-Pilot")
-st.write("I'm designed to make CRE process management seamless. Let me know how I can help.")
+# Center the logo above the title
+with st.container():
+    st.markdown("<div class='logo-container'><img src='/workspaces/TalosLabs_MVP_CRE/TalosLogo.png' width='120'></div>", unsafe_allow_html=True)
 
-# File uploader - customized with specific instructions
-st.write("Please upload your personal financial statements, LP memo, and a document outlining the changes requested.")
-uploaded_files = st.file_uploader(
-    "Upload relevant documents", accept_multiple_files=True, type=("txt", "md", "pdf", "xlsx", "docx")
+# Show title and description
+st.markdown("<div class='title'>Talos Labs: Your CRE Co-Pilot</div>", unsafe_allow_html=True)
+st.markdown(
+    "<div class='normal-text'>I'm designed to make CRE process management seamless. Let me know how I can help.</div>",
+    unsafe_allow_html=True,
 )
 
-# Initialize a variable to store the content of the uploaded documents
+# File uploader with instructions
+st.markdown(
+    "<div class='normal-text'>Please upload your personal financial statements, LP memo, and a document outlining the changes requested.</div>",
+    unsafe_allow_html=True,
+)
+uploaded_files = st.file_uploader(
+    "Upload relevant documents",
+    accept_multiple_files=True,
+    type=("txt", "md", "pdf", "xlsx", "docx"),
+    key="file_upload",
+)
+
+# Initialize a variable to store content from uploaded files
 additional_content = ""
 
 if uploaded_files:
     for uploaded_file in uploaded_files:
         # Display filenames with smaller font size
-        st.markdown(f"<div class='small-font'>filename: {uploaded_file.name}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='small-font'>Filename: {uploaded_file.name}</div>", unsafe_allow_html=True)
         # Read and process each file's contents
         if uploaded_file.type == "text/plain":
             additional_content += uploaded_file.read().decode("utf-8") + "\n"
@@ -93,10 +98,17 @@ if uploaded_files:
         else:
             additional_content += "Unsupported file type.\n"
 
-# Prompt box for user to specify changes
+# Prompt for user changes
 if uploaded_files:
-    st.write("Please include the changes required below:")
-    user_changes = st.text_area("Describe the changes needed", placeholder="E.g., include property details, investment summary, changes to net worth, etc.")
+    st.markdown(
+        "<div class='normal-text'>Please include the changes required below:</div>",
+        unsafe_allow_html=True,
+    )
+    user_changes = st.text_area(
+        "Describe the changes needed",
+        placeholder="E.g., include property details, investment summary, changes to net worth, etc.",
+        key="text_area",
+    )
 else:
     user_changes = ""
 
@@ -106,41 +118,43 @@ st.write("---")
 # Add buttons for memo generation
 col1, col2 = st.columns(2)
 
-generate_non_material = col1.button("Generate Non-Material Change Memo")
-generate_material = col2.button("Generate Material Change Memo")
+with col1:
+    generate_non_material = st.button("Generate Non-Material Change Memo", key="non_material_button")
+with col2:
+    generate_material = st.button("Generate Material Change Memo", key="material_button")
 
-if generate_non_material:
-    st.info("Non-Material Change Memo generation started...")
+# Function to handle the memo generation
+def generate_memo():
     try:
-        # Generate the response content and handle document creation
-        filled_template_doc = fill_template_with_content(load_template(), additional_content)
-        document_content = "\n".join([para.text for para in filled_template_doc.paragraphs])
-
+        # Combine template content with user inputs
+        document_content = f"Uploaded content:\n{additional_content}\nUser changes:\n{user_changes.strip()}"
         messages = [
             {
                 "role": "user",
                 "content": (
-                    f"Here's a document: {document_content} \n\n---\n\n"
-                    f"{user_changes.strip()}\n\n"
-                    "PLEASE PARSE through all numbers extracted and convert them to normal text. Don't include any pleasantries, I just want the output. The format that I would like it in is with four headers and for all sections to be evenly spaced out, with the headers emboldened. I want a header on background information, and beneath this a section that acts as a comprehensive summary of the uploaded LP memo. This should not be in bulletpoint form and should be standard text. Next, I want a property information header, and beneath it a section which is a bullet pointed overview of all of the relevant property information within the LP memo. Next, I want a header on Investment summary, followed by a bullet pointed overview of all of the relevant investment information within the LP memo, such as rates and terms. Next, I want an Updated Financial Information header, and beneath this a section that covers the following: Previous Net Worth (as of [DATE]): $X,XXX,XXX, with assets worth $X,XXX,XXX. followed by another bullet point that covers an Updated Net Worth (as of [DATE]): $X,XXX,XXX, with assets worth $X,XXX,XXX. There should then be a summary sentence in this section that covers the total asset changes between both personal financial statements with the numbers presented in the same format."
+                    f"{document_content}\n\n---\n\n"
+                    "Please generate a memo with the following structure: "
+                    "1. **Background Information**: A comprehensive overview from the LP memo in paragraph form. "
+                    "2. **Property Information**: A bullet-point summary of relevant property information. "
+                    "3. **Investment Summary**: Bullet-point overview of rates, terms, and financials from the LP memo. "
+                    "4. **Updated Financial Information**: Previous and updated net worth figures with total asset changes."
                 ),
             }
         ]
 
-        response = client.chat.completions.create(model="gpt-4",
-        messages=messages)
-        response_content = clean_text(response.choices[0].message.content)
+        # Call OpenAI API
+        response = client.chat.completions.create(model="gpt-4", messages=messages)
+        response_content = response.choices[0].message.content
 
-        # Display the generated output in the UI
+        # Display output in UI
         st.subheader("Generated Non-Material Change Memo")
-        st.markdown(f"<div style='font-size:18px; line-height:1.6;'>{response_content}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='normal-text'>{response_content}</div>", unsafe_allow_html=True)
 
-        # Create a Word document with the response content
+        # Save output to Word document
         output_doc = Document()
         output_doc.add_heading("Non-Material Change Memo", level=1)
         output_doc.add_paragraph(response_content)
 
-        # Save and download the document
         buffer = BytesIO()
         output_doc.save(buffer)
         buffer.seek(0)
@@ -150,20 +164,12 @@ if generate_non_material:
             file_name="Non_Material_Change_Memo.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
-    except openai.OpenAIError as e:
-        st.error(f"An OpenAI-related error occurred: {str(e)}")
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {str(e)}")
-
-elif generate_material:
-    st.info("Material Change Memo generation started...")
-    try:
-        # Placeholder logic for Material Change Memo generation
-        st.success("Material Change Memo functionality is not implemented yet.")
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 
-elif not user_changes.strip() and uploaded_files:
-    st.warning("Please include the changes required in the prompt box above.")
-elif not uploaded_files:
-    st.warning("Please upload relevant files before generating the document.")
+# Generate the memo based on button clicks
+if generate_non_material:
+    st.info("Generating Non-Material Change Memo...")
+    generate_memo()
+elif generate_material:
+    st.info("Material Change Memo generation is not implemented yet.")
