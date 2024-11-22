@@ -1,10 +1,9 @@
-from http.client import responses
 import streamlit as st
 from openai import OpenAI
 import pandas as pd
-from docx import Document  # For reading and writing .docx files
-from io import BytesIO  # For creating a downloadable Word file
-import re
+from docx import Document
+from io import BytesIO
+from PIL import Image
 
 # Access the OpenAI API key securely from Streamlit secrets
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
@@ -20,7 +19,12 @@ st.markdown(
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .logo-container img {
+            max-width: 150px;
+            height: auto;
         }
         .title {
             color: #4E81BD;
@@ -42,33 +46,45 @@ st.markdown(
             color: #555;
             margin-bottom: 10px;
         }
-        .file-upload {
-            margin-bottom: 20px;
-        }
-        .button-section {
-            margin-top: 30px;
+        .left-aligned {
+            text-align: left;
+            font-size: 16px;
+            color: black;
+            margin-top: 20px;
         }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# Center the logo above the title
-with st.container():
-    st.markdown("<div class='logo-container'><img src='/workspaces/TalosLabs_MVP_CRE/TalosLogo.png' width='120'></div>", unsafe_allow_html=True)
+# Display logo
+#st.markdown(
+#    """
+#    <div class="logo-container">
+#        <img src="/workspaces/TalosLabs_MVP_CRE/TalosLogo.png" alt="Logo">
+#    </div>
+#    """,
+#    unsafe_allow_html=True,
+#)
 
-# Show title and description
+# Display title and description
 st.markdown("<div class='title'>Talos Labs: Your CRE Co-Pilot</div>", unsafe_allow_html=True)
 st.markdown(
     "<div class='normal-text'>I'm designed to make CRE process management seamless. Let me know how I can help.</div>",
     unsafe_allow_html=True,
 )
 
-# File uploader with instructions
-st.markdown(
-    "<div class='normal-text'>Please upload your personal financial statements, LP memo, and a document outlining the changes requested.</div>",
-    unsafe_allow_html=True,
-)
+# Initialize session state for inputs and outputs
+if "uploaded_files" not in st.session_state:
+    st.session_state.uploaded_files = None
+if "generated_memo" not in st.session_state:
+    st.session_state.generated_memo = None
+if "user_changes" not in st.session_state:
+    st.session_state.user_changes = ""
+if "additional_content" not in st.session_state:
+    st.session_state.additional_content = ""
+
+# File uploader
 uploaded_files = st.file_uploader(
     "Upload relevant documents",
     accept_multiple_files=True,
@@ -76,100 +92,92 @@ uploaded_files = st.file_uploader(
     key="file_upload",
 )
 
-# Initialize a variable to store content from uploaded files
-additional_content = ""
-
+# Process uploaded files
 if uploaded_files:
+    st.session_state.uploaded_files = uploaded_files
+    additional_content = ""
     for uploaded_file in uploaded_files:
-        # Display filenames with smaller font size
         st.markdown(f"<div class='small-font'>Filename: {uploaded_file.name}</div>", unsafe_allow_html=True)
-        # Read and process each file's contents
         if uploaded_file.type == "text/plain":
             additional_content += uploaded_file.read().decode("utf-8") + "\n"
-        elif uploaded_file.type == "application/pdf":
-            additional_content += "PDF content parsing needed here" + "\n"  # Placeholder for PDFs
         elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             doc = Document(uploaded_file)
             for para in doc.paragraphs:
                 additional_content += para.text + "\n"
         elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
             df = pd.read_excel(uploaded_file)
-            additional_content += df.to_string(index=False) + "\n"  # Convert Excel to a string
+            additional_content += df.to_string(index=False) + "\n"
         else:
             additional_content += "Unsupported file type.\n"
+    st.session_state.additional_content = additional_content
 
-# Prompt for user changes
-if uploaded_files:
-    st.markdown(
-        "<div class='normal-text'>Please include the changes required below:</div>",
-        unsafe_allow_html=True,
-    )
-    user_changes = st.text_area(
-        "Describe the changes needed",
-        placeholder="E.g., include property details, investment summary, changes to net worth, etc.",
-        key="text_area",
-    )
-else:
-    user_changes = ""
+# Text area for user changes
+st.text_area(
+    "Describe the changes needed",
+    value=st.session_state.user_changes,
+    placeholder="E.g., include property details, investment summary, changes to net worth, etc.",
+    key="user_changes",
+)
 
-# Separator for buttons
-st.write("---")
+# Reset button to clear all inputs and outputs
+def reset_state():
+    st.session_state.clear()  # Clear all session state variables
+    st.experimental_rerun()  # Rerun the script to reflect the reset
 
-# Add buttons for memo generation
-col1, col2 = st.columns(2)
-
-with col1:
-    generate_non_material = st.button("Generate Non-Material Change Memo", key="non_material_button")
-with col2:
-    generate_material = st.button("Generate Material Change Memo", key="material_button")
-
-# Function to handle the memo generation
-def generate_memo():
+# Function to handle memo generation
+def generate_memo(is_material):
     try:
-        # Combine template content with user inputs
-        document_content = f"Uploaded content:\n{additional_content}\nUser changes:\n{user_changes.strip()}"
+        memo_type = "Material Change Memo" if is_material else "Non-Material Change Memo"
+        document_content = f"Uploaded content:\n{st.session_state.additional_content}\nUser changes:\n{st.session_state.user_changes.strip()}"
         messages = [
             {
                 "role": "user",
                 "content": (
                     f"{document_content}\n\n---\n\n"
-                    "Please generate a memo with the following structure: "
-                    "1. **Background Information**: A comprehensive overview from the LP memo in paragraph form. "
-                    "2. **Property Information**: A bullet-point summary of relevant property information. "
-                    "3. **Investment Summary**: Bullet-point overview of rates, terms, and financials from the LP memo. "
-                    "4. **Updated Financial Information**: Previous and updated net worth figures with total asset changes."
+                    "Please generate a memo with the following structure. Use bullet points where necessary and bolden headings. Please return all output as text only. Please ensure that the content is directly drawn from the uploaded documents. Please ensure that headings are bold and that the text below is in bullet point form and that there is adequate spacing between each paragraph. Please ensure that no pleasantries are used and that there are no adendums. This output is designed to show customers. Please ensure that text is properly emboldened, and if not, remove any asterisks. Remove any acknowledgement or signature section at the bottom of the output. Please leave spaces between each section. Please emolden the 'background information' header. Don't embolden the summary section header."
+                    "1. Summary: Provide a detailed paragraph overview. This should not be in bullet point form. Please leave a space below this"
+                    "2. Property Information: Bullet points summarizing property details. This information can be found in the LP memos provided."
+                    "3. Investment Summary: Bullet points outlining rates, terms, and financials. This information can be found in the LP memos provided."
+                    "4. Relevant Change Information: Bullet points outlining the change of circumstances. This information can be found in the prompt."
+                    "5. Updated Financial Information: Changes in net worth and total assets presented as plain numbers."        
+                    
                 ),
             }
         ]
-
-        # Call OpenAI API
         response = client.chat.completions.create(model="gpt-4", messages=messages)
-        response_content = response.choices[0].message.content
-
-        # Display output in UI
-        st.subheader("Generated Non-Material Change Memo")
-        st.markdown(f"<div class='normal-text'>{response_content}</div>", unsafe_allow_html=True)
-
-        # Save output to Word document
-        output_doc = Document()
-        output_doc.add_heading("Non-Material Change Memo", level=1)
-        output_doc.add_paragraph(response_content)
-
-        buffer = BytesIO()
-        output_doc.save(buffer)
-        buffer.seek(0)
-        st.download_button(
-            label="Download Non-Material Change Memo",
-            data=buffer,
-            file_name="Non_Material_Change_Memo.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        )
+        st.session_state.generated_memo = response.choices[0].message.content
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 
-# Generate the memo based on button clicks
-if generate_non_material:
-    st.info("Generating Non-Material Change Memo...")
-    generate_memo()
-elif generate_material:
-    st.info("Material Change Memo generation is not implemented yet.")
+# Buttons for memo generation and reset
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button("Generate Non-Material Change Memo"):
+        generate_memo(is_material=False)
+with col2:
+    if st.button("Generate Material Change Memo"):
+        generate_memo(is_material=True)
+with col3:
+    if st.button("Reset All"):
+        reset_state()
+
+# Display generated memo if available
+if st.session_state.generated_memo:
+    st.subheader("Generated Memo")
+    st.markdown(f"<div class='left-aligned'>{st.session_state.generated_memo}</div>", unsafe_allow_html=True)
+
+    # Save the memo as a Word document
+    output_doc = Document()
+    output_doc.add_heading("Generated Memo", level=1)
+    output_doc.add_paragraph(st.session_state.generated_memo)
+
+    buffer = BytesIO()
+    output_doc.save(buffer)
+    buffer.seek(0)
+
+    st.download_button(
+        label="Download Memo",
+        data=buffer,
+        file_name="Generated_Memo.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
