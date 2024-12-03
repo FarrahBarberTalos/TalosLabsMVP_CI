@@ -64,10 +64,6 @@ with col2:
 
 # Display title and description
 st.markdown("<div class='title'>Talos Labs CRE Co-Pilot</div>", unsafe_allow_html=True)
-st.markdown(
-    "<div class='normal-text'>I'm designed to make CRE process management seamless. Let me know how I can help.</div>",
-    unsafe_allow_html=True,
-)
 
 # Initialize session state for inputs and outputs
 if "uploaded_files" not in st.session_state:
@@ -81,7 +77,7 @@ if "additional_content" not in st.session_state:
 
 # File uploader
 uploaded_files = st.file_uploader(
-    "Please upload relevant documents, including personal financial statements, LP memos, and any client communication regarding requested changes.",
+    "Please upload relevant documents, including personal financial statements, LP memos, and any client communication regarding requested changes",
     accept_multiple_files=True,
     type=("txt", "md", "pdf", "xlsx", "docx"),
     key="file_upload",
