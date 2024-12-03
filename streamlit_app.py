@@ -19,11 +19,10 @@ st.markdown(
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 20px;
             margin-bottom: 20px;
         }
         .logo-container img {
-            max-width: 150px;
+            max-width: 200px;
             height: auto;
         }
         .title {
@@ -57,15 +56,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Display logo
-#st.markdown(
-#    """
-#    <div class="logo-container">
-#        <img src="/workspaces/TalosLabs_MVP_CRE/TalosLogo.png" alt="Logo">
-#    </div>
-#    """,
-#    unsafe_allow_html=True,
-#)
+
+# Use Streamlit columns to center the logo
+col1, col2, col3 = st.columns([2, 2, 1])  # Adjust column widths to control spacing
+with col2:
+    st.image("TalosLogo.png", width=150)  # Centered logo with specific width
 
 # Display title and description
 st.markdown("<div class='title'>Talos Labs: Your CRE Co-Pilot</div>", unsafe_allow_html=True)
