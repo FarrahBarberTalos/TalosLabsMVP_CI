@@ -63,7 +63,7 @@ with col2:
     st.image("TalosLogo.png", width=150)  # Centered logo with specific width
 
 # Display title and description
-st.markdown("<div class='title'>Talos Labs: Your CRE Co-Pilot</div>", unsafe_allow_html=True)
+st.markdown("<div class='title'>Talos Labs CRE Co-Pilot</div>", unsafe_allow_html=True)
 st.markdown(
     "<div class='normal-text'>I'm designed to make CRE process management seamless. Let me know how I can help.</div>",
     unsafe_allow_html=True,
@@ -81,7 +81,7 @@ if "additional_content" not in st.session_state:
 
 # File uploader
 uploaded_files = st.file_uploader(
-    "Upload relevant documents",
+    "Please upload relevant documents, including personal financial statements, LP memos, and any client communication regarding requested changes.",
     accept_multiple_files=True,
     type=("txt", "md", "pdf", "xlsx", "docx"),
     key="file_upload",
@@ -108,7 +108,7 @@ if uploaded_files:
 
 # Text area for user changes
 st.text_area(
-    "Describe the changes needed",
+    "Please copy and paste change request information",
     value=st.session_state.user_changes,
     placeholder="E.g., include property details, investment summary, changes to net worth, etc.",
     key="user_changes",
