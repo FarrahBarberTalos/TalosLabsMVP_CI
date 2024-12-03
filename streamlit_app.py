@@ -13,7 +13,7 @@ st.markdown(
     """
     <style>
         body {
-            background-color: #D7DEE7;
+            background-color: #FF5733
         }
         .logo-container {
             display: flex;
