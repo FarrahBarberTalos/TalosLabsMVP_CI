@@ -12,50 +12,98 @@ client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 st.markdown(
     """
     <style>
+        /* Body Styling */
         body {
-            background-color: #FF5733
+            background-color: #E6ECF5; /* Optional light background */
         }
+
+        /* Main Container */
+        .main {
+            padding: 100px 120px; /* Adds padding to the overall container */
+        }
+
+        /* Logo Styling */
         .logo-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 40px; /* Increased spacing below the logo */
         }
         .logo-container img {
             max-width: 200px;
             height: auto;
         }
+
+        /* Title and Normal Text */
         .title {
             color: #4E81BD;
             font-size: 32px;
             font-weight: bold;
             text-align: center;
             margin-top: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 30px; /* More space below the title */
         }
         .normal-text {
             color: black;
             font-size: 16px;
             text-align: center;
             margin-top: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 30px; /* Added space below normal text */
         }
+
+        /* Small Font */
         .small-font {
             font-size: 12px;
             color: #555;
-            margin-bottom: 10px;
+            margin-bottom: 15px; /* Increased spacing between file upload messages */
         }
+
+        /* Left-Aligned Text */
         .left-aligned {
             text-align: left;
             font-size: 16px;
             color: black;
-            margin-top: 20px;
+            margin-top: 30px; /* Added top margin for better separation */
+            line-height: 1.5; /* Increased line height for readability */
+        }
+
+        /* File Uploader Styling */
+        .stFileUploader {
+            padding: 15px; /* Adds padding inside the file uploader */
+            margin-bottom: 30px; /* Space below file uploader */
+            border-radius: 10px; /* Optional rounded corners */
+            background-color: #f4f4f9; /* Optional light background */
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for better visual structure */
+        }
+
+        /* Text Area Styling */
+        .stTextArea {
+            padding: 15px; /* Adds padding inside the text area */
+            margin-bottom: 30px; /* Adds space below text area */
+            border-radius: 10px; /* Optional rounded corners */
+            background-color: #f9f9f9; /* Optional light background */
+        }
+
+        /* Button Styling */
+        .stButton button {
+            padding: 15px 20px; /* Button size */
+            margin: 10px; /* Space between buttons */
+            border-radius: 5px; /* Rounded corners */
+            background-color: #4E81BD; /* Default button color */
+            color: white; /* Default text color */
+            font-size: 16px; /* Larger text size */
+            border: none; /* No border */
+            cursor: pointer; /* Pointer cursor on hover */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
+        }
+        .stButton button:hover {
+            background-color: #3b6999; /* Darker blue on hover */
+            color: white; /* Ensures text remains visible */
         }
     </style>
     """,
     unsafe_allow_html=True,
 )
-
 
 # Use Streamlit columns to center the logo
 col1, col2, col3 = st.columns([2, 2, 1])  # Adjust column widths to control spacing
