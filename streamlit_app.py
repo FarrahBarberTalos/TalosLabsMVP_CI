@@ -61,7 +61,7 @@ def generate_dscr_chart(df):
     # Normalize column names by stripping whitespace and converting to lowercase
     df.columns = df.columns.str.strip()  # Remove leading/trailing spaces
     df.columns = df.columns.str.lower()  # Convert to lowercase for uniformity
-    
+
     # Check for required columns
     if (
         "year" in df.columns
@@ -70,7 +70,15 @@ def generate_dscr_chart(df):
     ):
         try:
             fig, ax = plt.subplots(figsize=(10, 6))
-            ax.bar(df["year"], df["debt service coverage ratio"], label="Debt Service Coverage Ratio", alpha=0.7, color="blue")
+            
+            # Plot bar and line chart
+            ax.bar(
+                df["year"], 
+                df["debt service coverage ratio"], 
+                label="Debt Service Coverage Ratio", 
+                alpha=0.7, 
+                color="blue"
+            )
             ax.plot(
                 df["year"], 
                 df["minimum debt service coverage ratio"], 
@@ -79,11 +87,18 @@ def generate_dscr_chart(df):
                 label="Minimum Debt Service Coverage Ratio", 
                 linewidth=2
             )
+            
+            # Set X-axis ticks to integers
+            ax.set_xticks(df["year"].astype(int))  # Ensure integer ticks
+            
+            # Add labels, legend, and title
             ax.set_title("Debt Service Coverage Ratio (DSCR) Over Time", fontsize=14)
             ax.set_xlabel("Year", fontsize=12)
             ax.set_ylabel("Ratio", fontsize=12)
             ax.legend()
-            ax.grid(visible=True, linestyle='--', alpha=0.5)
+            ax.grid(visible=True, linestyle="--", alpha=0.5)
+            
+            # Render the chart
             st.pyplot(fig)
         except Exception as e:
             st.error(f"Error creating chart: {e}")
