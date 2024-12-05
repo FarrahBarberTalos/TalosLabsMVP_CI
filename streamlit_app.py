@@ -4,6 +4,7 @@ import pandas as pd
 from docx import Document
 from io import BytesIO
 from PIL import Image
+import matplotlib.pyplot as plt
 
 # Initialize session state variables safely
 st.session_state.setdefault("generated_memo", "")
@@ -45,7 +46,7 @@ with col2:
     st.image("TalosLogo.png", width=150)  # Centered logo with specific width
 
 # Display title and description
-st.markdown("<div class='title'>Talos Labs CRE Co-Pilot</div>", unsafe_allow_html=True)
+st.markdown("<div class='title'>Talos Labs C&I Co-Pilot</div>", unsafe_allow_html=True)
 
 # File uploader
 uploaded_files = st.file_uploader(
@@ -55,7 +56,44 @@ uploaded_files = st.file_uploader(
     key="file_upload",
 )
 
+# Function to generate DSCR chart with column normalization
+def generate_dscr_chart(df):
+    # Normalize column names by stripping whitespace and converting to lowercase
+    df.columns = df.columns.str.strip()  # Remove leading/trailing spaces
+    df.columns = df.columns.str.lower()  # Convert to lowercase for uniformity
+    
+    # Check for required columns
+    if (
+        "year" in df.columns
+        and "debt service coverage ratio" in df.columns
+        and "minimum debt service coverage ratio" in df.columns
+    ):
+        try:
+            fig, ax = plt.subplots(figsize=(10, 6))
+            ax.bar(df["year"], df["debt service coverage ratio"], label="Debt Service Coverage Ratio", alpha=0.7, color="blue")
+            ax.plot(
+                df["year"], 
+                df["minimum debt service coverage ratio"], 
+                color="red", 
+                marker="o", 
+                label="Minimum Debt Service Coverage Ratio", 
+                linewidth=2
+            )
+            ax.set_title("Debt Service Coverage Ratio (DSCR) Over Time", fontsize=14)
+            ax.set_xlabel("Year", fontsize=12)
+            ax.set_ylabel("Ratio", fontsize=12)
+            ax.legend()
+            ax.grid(visible=True, linestyle='--', alpha=0.5)
+            st.pyplot(fig)
+        except Exception as e:
+            st.error(f"Error creating chart: {e}")
+    else:
+        st.error(
+            "The uploaded file must contain 'Year', 'Debt Service Coverage Ratio', and 'Minimum Debt Service Coverage Ratio' columns."
+        )
+
 # Process uploaded files
+data = pd.read_excel("Parse_CSV (3).xlsx", header=3)  # Adjust 'header' index to the correct row
 if uploaded_files:
     st.session_state["uploaded_files"] = uploaded_files
     additional_content = ""
@@ -70,6 +108,7 @@ if uploaded_files:
         elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
             df = pd.read_excel(uploaded_file)
             additional_content += df.to_string(index=False) + "\n"
+            generate_dscr_chart(df)
         else:
             additional_content += "Unsupported file type.\n"
     st.session_state["additional_content"] = additional_content
@@ -92,12 +131,15 @@ def generate_memo(is_material):
                 "role": "user",
                 "content": (
                     f"{document_content}\n\n---\n\n"
-                    "Please generate a memo with the following structure. Use bullet points where necessary and bolden headings. "
-                    "1. Summary: Provide a detailed paragraph overview. This should not be in bullet point form."
-                    "2. Property Information: Bullet points summarizing property details."
-                    "3. Investment Summary: Bullet points outlining rates, terms, and financials."
-                    "4. Relevant Change Information: Bullet points outlining the change of circumstances."
-                    "5. Updated Financial Information: Changes in net worth and total assets presented as plain numbers."
+                    "Please act as a commercial lender at a top bank. You closed a commercial loan in 2021, and after 3 years, the borrower has requested a 6-month extension to the loan term due to permitting issues that took longer than expected. To maintain a strong relationship with this borrower, you are incentivized to secure credit team approval for the loan term extension. Create a non-material change memo to formalize this 6-month extension."
+                    "The memo should have the following structure and include a visual chart to support the case. Ensure formatting is consistent, and headers for all sections are bold."
+                    "Structure for the Memo:"
+                    "Section 1: Background Information"
+                    "Include relevant property information, investment summary, and rationale for the initial investment."
+                    "Section 2: Financial Information"
+                    "Please include all relevant financial information that we can extract from the memo."
+                    "Section 3: Rationale for the Extension"
+                    "Outline the borrowers current financial position and why this aligns with the bank's long-term interests."
                 ),
             }
         ]
