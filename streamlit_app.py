@@ -139,6 +139,8 @@ def generate_memo(is_material):
                     "Please include all relevant financial information that we can extract from the xlsx document uploaded and the LP memo. Please ensure that all financial information is presented in raw text and the table is clean."
                     "Section 3: Rationale for the Extension"
                     "Outline the borrower's current financial position and why this aligns with the bank's long-term interests."
+                    "Section 4: Personal Guarantor Information"
+                    "From the uploaded PFS CSV, please extract the year, name of the guarantor, residential address, city, state and ZIP, position or occupation, business name, net worth, total liabilities, and total assets"
                 ),
             }
         ]
