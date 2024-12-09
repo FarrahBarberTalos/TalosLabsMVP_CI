@@ -44,7 +44,7 @@ with col2:
     st.image("TalosLogo.png", width=150)
 
 # Display title and description
-st.markdown("<div class='title'>Talos Labs CRE Co-Pilot</div>", unsafe_allow_html=True)
+st.markdown("<div class='title'>Talos Labs Commercial Lending Co-Pilot</div>", unsafe_allow_html=True)
 
 # File uploader
 uploaded_files = st.file_uploader(
