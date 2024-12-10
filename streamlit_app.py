@@ -4,6 +4,8 @@ import pandas as pd
 from docx import Document
 from io import BytesIO
 import matplotlib.pyplot as plt
+from docx.shared import Inches
+
 
 # Initialize session state variables safely
 st.session_state.setdefault("generated_memo", "")
@@ -166,7 +168,7 @@ def generate_memo(is_material):
                     "The memo should have the following structure and include a visual chart to support the case. Ensure formatting is consistent, and headers for all sections are bold. It is important that you use bullet points for each new piece of informnation on each new line."
                     "Structure for the Memo:"
                     "Section 1: Background Information"
-                    "The content for this section can be found in the LP memo. Please return all information on separate lines. Include relevant property information, investment summary, and rationale for the initial investment, from the LP memo. Please list all of the information on separate lines."
+                    "The content for this section can be found in the LP memo. Please return all information on separate lines. Include relevant property information, investment summary, and rationale for the initial investment, from the LP memo. Please list all of the information on separate lines. Please include the 'client overview', including address and name of the client and guarantor."
                     "Section 2: Financial Information"
                     "The content for this section will be found in the PFS and Tax Return Documents. This document is the personal financial statement. I want all information about the borrower to be included on separate lines."
                     "Section 3: Rationale for the Extension"
@@ -193,27 +195,45 @@ with col3:
     if st.button("Refresh Page"):
         refresh_page()
 
-# Display generated memo if available
+output_doc = Document()
+output_doc.add_heading("Change Memo", level=1)
+output_doc.add_paragraph(st.session_state["generated_memo"])
+
+# Display the generated memo on the UI
+# Display the generated memo on the UI
 if st.session_state.get("generated_memo", ""):
     st.subheader("Generated Memo")
-    st.markdown(f"<div class='left-aligned'>{st.session_state['generated_memo']}</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div style='background-color: #FFFFFF; padding: 15px; border-radius: 5px;'>{st.session_state['generated_memo']}</div>",
+        unsafe_allow_html=True,
+    )
 
-    # Save memo as a Word document
+    # Display the chart on the UI if it exists
+    if st.session_state.get("chart_fig"):
+        st.pyplot(st.session_state["chart_fig"])
+
+    # Save the memo as a Word document
     output_doc = Document()
     output_doc.add_heading("Generated Memo", level=1)
     output_doc.add_paragraph(st.session_state["generated_memo"])
 
+    # Add chart to the Word document if it exists
+    if st.session_state.get("chart_fig"):
+        img_buffer = BytesIO()
+        st.session_state["chart_fig"].savefig(img_buffer, format="png")  # Save chart as PNG
+        img_buffer.seek(0)
+        output_doc.add_paragraph("Chart:")
+        output_doc.add_picture(img_buffer, width=Inches(6))  # Embed chart in the document
+
+    # Save Word document to buffer
     buffer = BytesIO()
     output_doc.save(buffer)
     buffer.seek(0)
 
+    # Provide download button for the memo with the chart
     st.download_button(
-        label="Download Memo",
+        label="Download Memo with Chart",
         data=buffer,
         file_name="Generated_Memo.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     )
-
-# Display chart after the memo
-if st.session_state.get("chart_fig", None):
-    st.pyplot(st.session_state["chart_fig"])
