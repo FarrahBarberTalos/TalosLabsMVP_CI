@@ -166,11 +166,11 @@ def generate_memo(is_material):
                     "The memo should have the following structure and include a visual chart to support the case. Ensure formatting is consistent, and headers for all sections are bold. It is important that you use bullet points for each new piece of informnation on each new line."
                     "Structure for the Memo:"
                     "Section 1: Background Information"
-                    "Please return all information on separate lines. Include relevant property information, investment summary, and rationale for the initial investment, from the LP memo. Please list all of the information on separate lines."
+                    "The content for this section can be found in the LP memo. Please return all information on separate lines. Include relevant property information, investment summary, and rationale for the initial investment, from the LP memo. Please list all of the information on separate lines."
                     "Section 2: Financial Information"
-                    "Please include all relevant financial information that can be found in the uploaded PFS_CSV. This document is the personal financial statement. I want all information about the borrower to be included on separate lines."
+                    "The content for this section will be found in the PFS and Tax Return Documents. This document is the personal financial statement. I want all information about the borrower to be included on separate lines."
                     "Section 3: Rationale for the Extension"
-                    "Please ensure that the heading is on a separate line to the content. Please provide a summary of the uploaded email template pdf to describe the rationale behind the loan extension. Please ensure that there is no reference to inserting visual charts."
+                    "The content for this will be found in the customer email. Please ensure that the heading is on a separate line to the content. Please provide a summary of the uploaded email template pdf to describe the rationale behind the loan extension. Please ensure that there is no reference to inserting visual charts."
                     "When you sign off the memo, please ensure that it says: [name of the lender], [bank of the lender], [job title of the lender]"
                 ),
             }
