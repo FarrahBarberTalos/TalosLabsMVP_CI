@@ -46,7 +46,7 @@ with col2:
     st.image("TalosLogo.png", width=150)
 
 # Display title and description
-st.markdown("<div class='title'>Commercial Lending Co-Pilot</div>", unsafe_allow_html=True)
+st.markdown("<div class='title'>Commercial Real Estate Co-Pilot</div>", unsafe_allow_html=True)
 
 # File uploader
 uploaded_files = st.file_uploader(
@@ -168,7 +168,7 @@ def generate_memo(is_material):
                     "The memo should have the following structure and include a visual chart to support the case. Ensure formatting is consistent, and headers for all sections are bold. It is very important that all content is written in full sentences and is cogent, well written, and clear."
                     "Structure for the Memo:"
                     "Section 1: Background Information"
-                    "The content for this section can be found in the LP memo. Please return all information on separate lines. Include relevant property information, investment summary, and rationale for the initial investment, from the LP memo. Please list all of the information on separate lines. Please include the 'client overview', including address and name of the client and guarantor."
+                    "The content for this section can be found in the LP memo. Please return all information on separate lines. Include relevant pr operty information, investment summary, and rationale for the initial investment, from the LP memo. Please list all of the information on separate lines. Please include the 'client overview', including address and name of the client and guarantor."
                     "Section 2: Financial Information"
                     "The content for this section will be found in the PFS and Tax Return Documents. This document is the personal financial statement. I want all information about the borrower to be included on separate lines."
                     "Section 3: Rationale for the Extension"
