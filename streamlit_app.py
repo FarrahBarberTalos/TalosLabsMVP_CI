@@ -165,7 +165,7 @@ def generate_memo(is_material):
                 "content": (
                     f"{document_content}\n\n---\n\n"
                     "Please act as a commercial lender at a top bank and so you must have very corporate communication. You closed a commercial loan in 2021, and after 3 years, the borrower has requested a 6-month extension to the loan term due to permitting issues that took longer than expected. To maintain a strong relationship with this borrower, you are incentivized to secure credit team approval for the loan term extension. Create a non-material change memo to formalize this 6-month extension. It is imperative that any output returned is in plain text form."
-                    "The memo should have the following structure and include a visual chart to support the case. Ensure formatting is consistent, and headers for all sections are bold. It is important that you use bullet points for each new piece of informnation on each new line."
+                    "The memo should have the following structure and include a visual chart to support the case. Ensure formatting is consistent, and headers for all sections are bold. It is very important that all content is written in full sentences and is cogent, well written, and clear."
                     "Structure for the Memo:"
                     "Section 1: Background Information"
                     "The content for this section can be found in the LP memo. Please return all information on separate lines. Include relevant property information, investment summary, and rationale for the initial investment, from the LP memo. Please list all of the information on separate lines. Please include the 'client overview', including address and name of the client and guarantor."
